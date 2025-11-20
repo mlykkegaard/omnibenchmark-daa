@@ -1,0 +1,98 @@
+id: proteomics_daa_conda
+description: Benchmark for differential abundance analysis in proteomics
+version: 1.0
+benchmarker: "Maria Lykkegaard-Kelstrup"
+storage: http://omnibenchmark.org:9000
+benchmark_yaml_spec: 0.04
+storage_api: S3
+storage_bucket_name: proteomicsdaa
+software_backend: conda
+software_environments:
+  msstats:
+    description: "MSstats in R"
+    conda: envs/msstats.yml
+    envmodule: msstats
+    apptainer: oras://quay.io/yourrepo/proteomics_daa/msstats:latest
+  limma:
+    description: "limma for proteomics differential analysis"
+    conda: envs/limma.yml
+    envmodule: limma
+    apptainer: oras://quay.io/yourrepo/proteomics_daa/limma:latest
+metric_collectors:
+  - id: volcano_plot
+    name: "Volcano plot generator"
+    software_environment: "limma"
+    repository:
+      url: https://github.com/yourrepo/proteomics_report
+      commit: abc123
+    inputs:
+      - metrics.daa_results
+    outputs:
+      - id: volcano.html
+        path: "{input}/{name}/volcano_report.html"
+stages:
+  ## daa data ##########################################################
+
+  - id: data
+    modules:
+      - id: proteomics_data
+        name: "Public proteomics datasets (PRIDE, CPTAC)"
+        software_environment: "msstats"
+        repository:
+          url: https://github.com/yourrepo/proteomics_data
+          commit: ?
+        parameters:
+          - values: ["--dataset", "CPTAC_ColonCancer"]
+    outputs:
+      - id: data.matrix
+        path: "{input}/{stage}/{module}/{params}/{dataset}.quant.gz"
+      - id: data.metadata
+        path: "{input}/{stage}/{module}/{params}/{dataset}.meta.gz"
+
+  ## daa methods ###################################################################
+  - id: daa
+  modules:
+    - id: msstats
+      name: "MSstats pipeline"
+      software_environment: "msstats"
+      repository:
+        url: https://github.com/yourrepo/proteomics_msstats
+        commit: 789abc
+      parameters:
+        - values: ["--method", "linear_model"]
+    - id: limma
+      name: "limma pipeline"
+      software_environment: "limma"
+      repository:
+        url: https://github.com/yourrepo/proteomics_limma
+        commit: def456
+      parameters:
+        - values: ["--contrast", "conditionA_vs_conditionB"]
+  inputs:
+    - entries:
+        - data.matrix
+        - data.metadata
+  outputs:
+    - id: daa.results
+      path: "{input}/{stage}/{module}/{params}/{dataset}.daa.gz"
+
+   ## daa metrics ###################################################################
+  - id: metrics
+  modules:
+    - id: daa_metrics
+      name: "Differential abundance metrics"
+      software_environment: "msstats"
+      repository:
+        url: https://github.com/yourrepo/proteomics_metrics
+        commit: 654321
+      parameters:
+        - values: ["--metric", "fdr"]
+        - values: ["--metric", "sensitivity"]
+        - values: ["--metric", "specificity"]
+    inputs:
+      - entries:
+          - daa.results
+          - data.metadata
+    outputs:
+      - id: metrics.daa_results
+        path: "{input}/{stage}/{module}/{params}/{dataset}.scores.gz"
