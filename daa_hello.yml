@@ -1,0 +1,82 @@
+id: proteomics_daa_hello
+description: Minimal benchmark for differential abundance analysis in proteomics.
+version: 0.1
+benchmarker: "Your Name"
+storage: http://omnibenchmark.org:9000
+benchmark_yaml_spec: 0.04
+storage_api: S3
+storage_bucket_name: proteomicshello
+software_backend: conda
+
+software_environments:
+  msstats:
+    description: "MSstats in R"
+    conda: envs/msstats.yml
+    envmodule: msstats
+    apptainer: oras://quay.io/yourrepo/proteomics_daa/msstats:latest
+
+metric_collectors:
+  - id: volcano_plot
+    name: "Volcano plot generator"
+    software_environment: "msstats"
+    repository:
+      url: https://github.com/yourrepo/proteomics_report
+      commit: abc123
+    inputs:
+      - metrics.daa_results
+    outputs:
+      - id: volcano.html
+        path: "{input}/{name}/volcano_report.html"
+
+stages:
+  - id: data
+    modules:
+      - id: proteomics_data
+        name: "Tiny test dataset from PRIDE"
+        software_environment: "msstats"
+        repository:
+          url: https://github.com/yourrepo/proteomics_data
+          commit: 123456
+        parameters:
+          - values: ["--dataset", "PRIDE_PXD000561"]
+    outputs:
+      - id: data.matrix
+        path: "{input}/{stage}/{module}/{params}/{dataset}.quant.gz"
+      - id: data.metadata
+        path: "{input}/{stage}/{module}/{params}/{dataset}.meta.gz"
+
+  - id: daa
+    modules:
+      - id: msstats
+        name: "MSstats pipeline"
+        software_environment: "msstats"
+        repository:
+          url: https://github.com/yourrepo/proteomics_msstats
+          commit: 789abc
+        parameters:
+          - values: ["--method", "linear_model"]
+    inputs:
+      - entries:
+          - data.matrix
+          - data.metadata
+    outputs:
+      - id: daa.results
+        path: "{input}/{stage}/{module}/{params}/{dataset}.daa.gz"
+
+  - id: metrics
+    modules:
+      - id: daa_metrics
+        name: "Basic DAA metrics"
+        software_environment: "msstats"
+        repository:
+          url: https://github.com/yourrepo/proteomics_metrics
+          commit: 654321
+        parameters:
+          - values: ["--metric", "fdr"]
+    inputs:
+      - entries:
+          - daa.results
+          - data.metadata
+    outputs:
+      - id: metrics.daa_results
+        path: "{input}/{stage}/{module}/{params}/{dataset}.scores.gz"
