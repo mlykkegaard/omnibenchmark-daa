@@ -13,14 +13,13 @@ software_environments:
     description: "MSstats in R"
     conda: envs/msstats.yml
     envmodule: msstats
-    apptainer: oras://quay.io/yourrepo/proteomics_daa/msstats:latest
 
 metric_collectors:
   - id: volcano_plot
     name: "Volcano plot generator"
     software_environment: "msstats"
     repository:
-      url: https://github.com/yourrepo/proteomics_report
+      url: https://github.com/mlykkegaard/proteomics_report
       commit: abc123
     inputs:
       - metrics.daa_results
@@ -35,7 +34,7 @@ stages:
         name: "Tiny test dataset from PRIDE"
         software_environment: "msstats"
         repository:
-          url: https://github.com/yourrepo/proteomics_data
+          url: https://github.com/mlykkegaard/proteomics_data
           commit: 123456
         parameters:
           - values: ["--dataset", "PRIDE_PXD000561"]
@@ -51,7 +50,7 @@ stages:
         name: "MSstats pipeline"
         software_environment: "msstats"
         repository:
-          url: https://github.com/yourrepo/proteomics_msstats
+          url: https://github.com/mlykkegaard/proteomics_msstats
           commit: 789abc
         parameters:
           - values: ["--method", "linear_model"]
@@ -69,7 +68,7 @@ stages:
         name: "Basic DAA metrics"
         software_environment: "msstats"
         repository:
-          url: https://github.com/yourrepo/proteomics_metrics
+          url: https://github.com/mlykkegaard/proteomics_metrics
           commit: 654321
         parameters:
           - values: ["--metric", "fdr"]
