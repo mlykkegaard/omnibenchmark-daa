@@ -1,0 +1,20 @@
+name: limma
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - r-base=4.3
+  - bioconductor-limma
+  - r-tidyverse
+  - r-data.table
+  - r-ggplot2
+  - r-optparse
+  - r-knitr
+  - r-rmarkdown
+  - r-biocmanager
+  - pip
+  - pip:
+      - pyyaml
+      - pandas
+      - numpy
