@@ -1,7 +1,7 @@
 id: proteomics_daa_hello
 description: Minimal benchmark for differential abundance analysis in proteomics.
 version: 0.1
-benchmarker: "Your Name"
+benchmarker: "Maria"
 storage: http://omnibenchmark.org:9000
 benchmark_yaml_spec: 0.04
 storage_api: S3
