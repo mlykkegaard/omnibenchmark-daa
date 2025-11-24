@@ -1,7 +1,7 @@
 id: proteomics_daa_conda
 description: Benchmark for differential abundance analysis in proteomics
 version: 1.0
-benchmarker: "Maria Lykkegaard-Kelstrup"
+benchmarker: "Lorenzo, Alessia, Josefine and Maria"
 storage: http://omnibenchmark.org:9000
 benchmark_yaml_spec: 0.04
 storage_api: S3
